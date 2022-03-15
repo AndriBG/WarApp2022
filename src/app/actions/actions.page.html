@@ -5,5 +5,10 @@
 </ion-header>
 
 <ion-content>
-  Acciones
+        <!-- fab placed to the (vertical) center and end -->
+        <ion-fab vertical="center" horizontal="end" slot="fixed">
+          <ion-fab-button (click)="addAction()">
+            <ion-icon name="add"></ion-icon>
+          </ion-fab-button>
+        </ion-fab>
 </ion-content>
