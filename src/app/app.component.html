@@ -1,3 +1,34 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <!-- <ion-router-outlet> -->
+    <ion-tabs>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="home">
+          <ion-icon size="small" name="home"></ion-icon>
+          <ion-label>Home</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="add-actions">
+          <ion-icon size="small" name="add-circle"></ion-icon>
+          <ion-label>Add Action</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="actions">
+          <ion-icon size="small" name="receipt"></ion-icon>
+          <ion-label>Actions</ion-label>
+        </ion-tab-button>
+        <!-- <ion-tab-button tab="about">
+          <ion-icon size="small" name="alert"></ion-icon>
+          <ion-label>Acerca</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="vida">
+          <ion-icon size="small" name="heart"></ion-icon>
+          <ion-label>vida</ion-label>
+        </ion-tab-button> -->
+      </ion-tab-bar>
+    </ion-tabs>
+      <!-- fab placed to the (vertical) center and end -->
+  <ion-fab vertical="center" horizontal="end" slot="fixed">
+    <ion-fab-button>
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <!-- </ion-router-outlet> -->
 </ion-app>
