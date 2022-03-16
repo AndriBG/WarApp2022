@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { LoadingController, Platform } from '@ionic/angular';
-// import { fileURLToPath } from 'url';
+import { ModalController } from '@ionic/angular'
+import { ModalPage } from '../modal/modal.page'
 
 const IMAGE_DIR = 'stored-images';
 
@@ -22,7 +23,7 @@ export class HomePage implements OnInit {
   images: LocalFile[] = [];
   // loading: any;
 
-  constructor(private platform: Platform, private loadingCtrl: LoadingController) {}
+  constructor(private platform: Platform, private loadingCtrl: LoadingController,private modal : ModalController) {}
 
   async ngOnInit() {
     this.loadFiles();
@@ -131,10 +132,21 @@ export class HomePage implements OnInit {
     this.loadFiles();
   }
 
-    // private async readAsBase64(photo: Photo) {
-    //   const response = await fetch(photo.webPath!);
-    //   const blob = await response.blob();
-
-    //   return await this.convertBlobToBase64(blob) as string;
-    // }
+  async addAction(){
+    const modal = await this.modal.create({
+      component: ModalPage,
+      // cssClass: 'my-custom-class',
+      breakpoints: [0, 0.25, 0.5, 0.75, 1],
+      keyboardClose: false,
+      // handle: true,
+      // htmlAttributes: ModalAttributes,
+      // leaveAnimation:  (ba: any) => ,
+      componentProps: {
+        // video: e.video,
+        // title: e.titulo,
+        // descripcion: e.descripcion
+      }
+    });
+    return await modal.present();
+  }
 }
