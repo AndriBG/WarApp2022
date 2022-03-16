@@ -13,9 +13,17 @@
 
   img {
     width: 100%;
-    heigth: 100%;
+    // heigth: 100%;
   }
 
+}
+
+ion-toolbar {
+  --background: linear-gradient(80deg, rgba(0,36,9,1) 0%, rgba(113,125,30,1) 100%);
+  }
+
+ion-content {
+  --background: url('../../assets/fondo_war_app.svg');
 }
 
 #container strong {

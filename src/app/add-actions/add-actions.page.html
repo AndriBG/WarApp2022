@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>addActions</ion-title>
+    <ion-title>Add Actions</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -19,6 +19,36 @@
       <ion-input></ion-input>
   </ion-item>
 
-  <ion-button shape="round" expand="full" fill="outline">Save action</ion-button>
+  <ion-toolbar color="primary">
+    <ion-button fill="clear" expand="full" color="light" (click)="selectImage()">
+      <ion-icon slot="start" name="camera">
+        Select image
+      </ion-icon>
+    </ion-button>
+  </ion-toolbar>
+
+    <ion-button expand="full" color="light" (click)="startRecording()">
+      <!-- <ion-icon slot="start" name="camera"> -->
+        Start
+      <!-- </ion-icon> -->
+    </ion-button>
+
+    <ion-button (click)="stopRecording()" color="danger" expand="full">
+      <!-- <ion-icon slot="start" name="camera"> -->
+        Stop
+      <!-- </ion-icon> -->
+    </ion-button>
+
+    <ion-list>
+      <ion-item button *ngFor="let f of storedFileNames" (click)="playFile(f)">
+        {{ f }}
+      </ion-item>
+    </ion-list>
 
 </ion-content>
+
+<ion-footer>
+
+  <ion-button class="btn-save" shape="round" expand="full" fill="outline">Save action</ion-button>
+
+</ion-footer>

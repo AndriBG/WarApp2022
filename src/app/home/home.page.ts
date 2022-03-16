@@ -72,19 +72,24 @@ export class HomePage implements OnInit {
   }
 
   async selectImage () {
-    const image = await Camera.getPhoto({
-      quality: 90,
-      allowEditing: false,
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Camera
-    });
-    // console.log(image);
-    if(image) {
-      this.saveImage(image);
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera
+      });
+      // console.log(image);
+      if(image) {
+        this.saveImage(image);
+      }
+    } catch(error){
+      console.log(error)
     }
+
   }
 
-  async saveImage(photo: Photo) : Promise<void> {
+  async saveImage(photo: Photo)  {
     const base64Data = await this.readAsBase64(photo);
     const fileName = new Date().getTime() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
