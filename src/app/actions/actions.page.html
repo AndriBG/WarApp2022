@@ -1,12 +1,14 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Lista de accioness</ion-title>
+    <ion-title>Lista de acciones</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
 
+  <!-- images -->
   <h3 *ngIf="images.length == 0" class="ion-padding ion-text-center">Please select image</h3>
+  <h3 *ngIf="images.length != 0" class="ion-padding ion-text-center">Lista de fotos</h3>
 
   <ion-list>
     <ion-item *ngFor="let file of images; let i = index">
@@ -25,10 +27,29 @@
     </ion-item>
   </ion-list>
 
+  <!-- audios -->
   <h3 *ngIf="storedFileNames.length == 0" class="ion-padding ion-text-center">Please select Audio</h3>
+  <h3 *ngIf="storedFileNames.length != 0" class="ion-padding ion-text-center">Lista de Audios</h3>
+
         <ion-list>
           <ion-item button *ngFor="let f of storedFileNames" (click)="playFile(f)">
             {{ f }}
           </ion-item>
         </ion-list>
+
+        <!-- acciones -->
+        <h3 *ngIf="acts.length == 0" class="ion-padding ion-text-center">Please Add a Action</h3>
+        <h3 *ngIf="acts.length != 0" class="ion-padding ion-text-center">Lista de acciones</h3>
+        <ion-list>
+          <ion-item *ngFor="let f of acts">
+            {{ f.title }} -- {{ f.date }} -- {{ f.descrip }} 
+          </ion-item>
+        </ion-list>
+        
 </ion-content>
+
+<ion-footer>
+
+  <ion-button class="btn-save" shape="round" expand="full" fill="outline" (click)="deleteAllData()">Delete all</ion-button>
+
+</ion-footer>

@@ -14,8 +14,8 @@ import { HttpClientModule } from '@angular/common/http';
   declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, HttpClientModule,  IonicStorageModule.forRoot({
-    name: '__mydb',
-     driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage]
+    name: 'war_db',
+     driverOrder: [ /*Drivers.SecureStorage*/ Drivers.IndexedDB, Drivers.LocalStorage]
   })],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },],
   bootstrap: [AppComponent],

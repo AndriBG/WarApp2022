@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
-import { LoadingController, ModalController } from '@ionic/angular'
+import { LoadingController } from '@ionic/angular'
+import { Storage } from '@ionic/storage-angular'
 
 const IMAGE_DIR = 'stored-images';
+const AUDIO_DIR = 'stored-audios';
 
 interface LocalFile {
   name: string,
@@ -19,6 +21,8 @@ export class ActionsPage implements OnInit {
 
   storedFileNames = [];
   images: LocalFile[] = [];
+  audios: LocalFile[] = [];
+
   acts : Array<object> = [];
 
   constructor(private loadingCtrl: LoadingController, private storage: Storage) { }
@@ -26,28 +30,35 @@ export class ActionsPage implements OnInit {
   ngOnInit() {
     this.loadFiles();
     this.loadAudios();
-    // this.getActs();
+    this.getActs();
   }
 
+  // get actions
   async getActs() {
-    const title = await this.storage.get('title');
-    const date = await this.storage.get('date');
-    const descrip = await this.storage.get('descrip');
-    console.log(title,date,descrip)
+    this.storage.forEach((_value,_key,_iterationNumber) => {
+      this.acts.push({title:_value.title,date:_value.date,descrip:_value.descrip});
+    });
   }
 
-  loadAudios() {
+  async loadAudios() {
+    this.audios = []
     Filesystem.readdir({
-      path: '',
+      path: AUDIO_DIR,
       directory: Directory.Data,
     }).then( result => {
       this.storedFileNames = result.files;
+      // this.audios= result.files;
+    }, async () => {
+      await Filesystem.mkdir({
+        directory: Directory.Data,
+        path: AUDIO_DIR
+      });
     })
   }
 
-  async playFile(fileName) {
+  async playFile(fileName:string) : Promise<void> {
     const audioFile = await Filesystem.readFile({
-      path: fileName,
+      path: `${AUDIO_DIR}/${fileName}`,
       directory: Directory.Data
     });
     const base64Sound = audioFile.data;
@@ -56,6 +67,7 @@ export class ActionsPage implements OnInit {
     audioRef.load();
   }
 
+  // get images
   async loadFiles() {
     this.images = [];
     const loading = await this.loadingCtrl.create({
@@ -68,7 +80,7 @@ export class ActionsPage implements OnInit {
       directory: Directory.Data,
       path: IMAGE_DIR
     }).then( result => {
-      console.log('result', result);
+      // console.log('result', result);
       this.loadFileData(result.files)
     }, async err => {
       console.error('error ', err);
@@ -94,7 +106,23 @@ export class ActionsPage implements OnInit {
         path: filePath,
         data: `data:image/jpeg;base64,${readFile.data}`
       });
-      console.log('READ: ', readFile)
+      // console.log('READ: ', readFile)
+    }
+  }
+
+  async loadFileDataAudio(fileNames: string[]) {
+    for (let f of fileNames) {
+      const filePath = `${AUDIO_DIR}/${f}`;
+      const readFile = await Filesystem.readFile({
+        directory: Directory.Data,
+        path: filePath
+      });
+      this.audios.push({
+        name: f,
+        path: filePath,
+        data: `data:audio/aac;base64,${readFile.data}`
+      });
+      // console.log('READ: ', readFile)
     }
   }
 
@@ -103,5 +131,25 @@ export class ActionsPage implements OnInit {
       directory: Directory.Data,
       path: file.path
     });
+    this.loadFiles();    
   }
+
+  async deleteAllData() {
+    await this.storage.clear();
+    await Filesystem.rmdir({
+      path: IMAGE_DIR,
+      directory: Directory.Data,
+      recursive: true
+    });
+    await Filesystem.rmdir({
+      path: AUDIO_DIR,
+      directory: Directory.Data,
+      recursive: true
+    });
+    // this.ngOnInit();
+    await this.loadAudios();
+    await this.loadFiles();
+    await this.getActs();
+  }
+  
 }

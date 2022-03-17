@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Directory, Filesystem } from '@capacitor/filesystem';
-import { LoadingController, Platform } from '@ionic/angular';
-import { ModalController } from '@ionic/angular'
+import { Platform } from '@ionic/angular';
 import { RecordingData, VoiceRecorder } from 'capacitor-voice-recorder';
 import { Storage } from '@ionic/storage-angular';
 
 const IMAGE_DIR = 'stored-images';
+const AUDIO_DIR = 'stored-audios';
 
 interface LocalFile {
   name: string,
@@ -25,23 +25,23 @@ export class AddActionsPage implements OnInit {
   descrip: string;
 
   recording = false;
-  images: LocalFile[] = [];
 
-  constructor(private platform: Platform, private loadingCtrl: LoadingController,private storage: Storage) {}
+  constructor(private platform: Platform,private storage: Storage) {}
 
   async ngOnInit() {
     await this.storage.create();
     VoiceRecorder.requestAudioRecordingPermission();
+    // encrytion way to storage data 
+    // await this.storage.defineDriver(IonicSecureStorageDriver);
   }
 
   saveAction(){
-    this.set('title', this.title);
-    this.set('date', this.date);
-    this.set('descrip', this.descrip);
-  }
-
-  public set(key: string, value: any) {
-    this.storage.set(key, value);
+    this.storage.set(`${new Date().getTime()}`, {title:this.title,date:this.date,descrip:this.descrip});
+    this.title = '';
+    this.date = '';
+    this.descrip = '';
+    // ecryption way to manage data
+    // this.storage.setEncryptionKey('mykey');
   }
 
   startRecording () {
@@ -59,14 +59,12 @@ export class AddActionsPage implements OnInit {
     VoiceRecorder.stopRecording().then(async (result: RecordingData) => {
       if(result.value && result.value.recordDataBase64) {
         const recordData = result.value.recordDataBase64;
-        const fileName = new Date().getTime() + '.wav';
+        const fileName = `${AUDIO_DIR}/${new Date().getTime()}.wav`;
         await Filesystem.writeFile({
           path: fileName,
           directory: Directory.Data,
           data: recordData
         });
-        // this.loadFiles();
-        // this.loadAudios();
       }
     });
   }
@@ -123,15 +121,38 @@ export class AddActionsPage implements OnInit {
     reader.readAsDataURL(blob);
   });
 
-  async deleteImage( file: LocalFile ) {
-    await Filesystem.deleteFile({
-      directory: Directory.Data,
-      path: file.path
-    });
-  }
-
   // upload the
   async startUpload( file: LocalFile ){
 
   }
+
+
+  // for encryption storage data
+  // async migrateDatabase() {
+  //   const origStore = new Storage({
+  //     name: 'originalDB', // the original database name
+  //     driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
+  //   });
+  //   await origStore.defineDriver(CordovaSQLiteDriver);
+  
+  //   const newStore = new Storage({
+  //     name: 'encryptedDB', // pick a new db name for the encrypted db
+  //     driverOrder: [Drivers.SecureStorage, Drivers.IndexedDB, Drivers.LocalStorage]
+  //   });
+  //   await newStore.defineDriver(IonicSecureStorageDriver);
+  //   newStore.setEncryptionKey('mykey');
+  
+  //   if (await origStore.length() > 0) {
+  //     // copy existing data into new, encrypted format
+  //     await origStore.forEach((key, value, index) => {
+  //       newStore.set(key, value);
+  //     });
+  
+  //     // remove old data
+  //     await origStore.clear();
+  //   }
+  
+  //   this._storage = newStore;
+  // }
 }
+
