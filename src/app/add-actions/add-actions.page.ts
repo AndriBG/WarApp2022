@@ -1,33 +1,47 @@
 import { Component, OnInit } from '@angular/core';
+import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Directory, Filesystem } from '@capacitor/filesystem';
-import { ModalController } from '@ionic/angular';
+import { LoadingController, Platform } from '@ionic/angular';
+import { ModalController } from '@ionic/angular'
 import { RecordingData, VoiceRecorder } from 'capacitor-voice-recorder';
-import { ModalPage } from '../modal/modal.page'
+import { Storage } from '@ionic/storage-angular';
 
+const IMAGE_DIR = 'stored-images';
+
+interface LocalFile {
+  name: string,
+  path: string,
+  data: string
+}
 @Component({
   selector: 'app-add-actions',
   templateUrl: './add-actions.page.html',
   styleUrls: ['./add-actions.page.scss'],
 })
 export class AddActionsPage implements OnInit {
-  recording = false;
-  storedFileNames = [];
-  constructor(private modal : ModalController) { }
 
-  ngOnInit() {
-    this.loadFiles();
+  title : string;
+  date: string;
+  descrip: string;
+
+  recording = false;
+  images: LocalFile[] = [];
+
+  constructor(private platform: Platform, private loadingCtrl: LoadingController,private storage: Storage) {}
+
+  async ngOnInit() {
+    await this.storage.create();
     VoiceRecorder.requestAudioRecordingPermission();
   }
 
-  async loadFiles() {
+  saveAction(){
+    this.set('title', this.title);
+    this.set('date', this.date);
+    this.set('descrip', this.descrip);
+  }
 
-    Filesystem.readdir({
-      path: '',
-      directory: Directory.Data
-    }).then( result => {
-      // console.log(result);
-      this.storedFileNames = result.files;
-    })
+  public set(key: string, value: any) {
+    this.storage.set(key, value);
   }
 
   startRecording () {
@@ -51,38 +65,73 @@ export class AddActionsPage implements OnInit {
           directory: Directory.Data,
           data: recordData
         });
-        this.loadFiles();
+        // this.loadFiles();
+        // this.loadAudios();
       }
     });
   }
 
-  async playFile(fileName) {
-    const audioFile = await Filesystem.readFile({
-      path: fileName,
-      directory: Directory.Data
-    });
-    const base64Sound = audioFile.data;
-    const audioRef = new Audio(`data:audio/aac;base64,${base64Sound}`);
-    audioRef.oncanplaythrough = () => audioRef.play();
-    audioRef.load();
-  }
-
-  async addAction() {
-    const modal = await this.modal.create({
-      component: ModalPage,
-      // cssClass: 'my-custom-class',
-      breakpoints: [0, 0.25, 0.5, 0.75, 1],
-      keyboardClose: false,
-      // handle: true,
-      // htmlAttributes: ModalAttributes,
-      // leaveAnimation:  (ba: any) => ,
-      componentProps: {
-        // video: e.video,
-        // title: e.titulo,
-        // descripcion: e.descripcion
+  async selectImage () {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera
+      });
+      // console.log(image);
+      if(image) {
+        this.saveImage(image);
       }
-    });
-    return await modal.present();
+    } catch(error){
+      console.log(error)
+    }
+
   }
 
+  async saveImage(photo: Photo)  {
+    const base64Data = await this.readAsBase64(photo);
+    const fileName = new Date().getTime() + '.jpeg';
+    const savedFile = await Filesystem.writeFile({
+      directory: Directory.Data,
+      path: `${IMAGE_DIR}/${fileName}`,
+      data: base64Data
+    });
+  }
+
+  private async readAsBase64(photo: Photo) {
+    if(this.platform.is('hybrid')){
+      const file = await Filesystem.readFile({
+        path: photo.path
+      });
+      return file.data
+    } else {
+      const response = await fetch(photo.webPath!);
+      const blob = await response.blob();
+
+      return await this.convertBlobToBase64(blob) as string;
+    }
+
+  }
+
+  private convertBlobToBase64 = (blob: Blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+        resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+  });
+
+  async deleteImage( file: LocalFile ) {
+    await Filesystem.deleteFile({
+      directory: Directory.Data,
+      path: file.path
+    });
+  }
+
+  // upload the
+  async startUpload( file: LocalFile ){
+
+  }
 }
